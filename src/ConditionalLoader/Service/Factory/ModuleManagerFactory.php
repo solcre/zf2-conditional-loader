@@ -5,7 +5,7 @@ namespace ConditionalLoader\Service\Factory;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Mvc\Service\ModuleManagerFactory;
 
-class ConditionalModuleManagerFactory extends ModuleManagerFactory
+class ModuleManagerFactory extends ModuleManagerFactory
 {
     /**
      * {@inheritDoc}
