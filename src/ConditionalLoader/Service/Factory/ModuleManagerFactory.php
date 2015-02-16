@@ -3,9 +3,10 @@
 namespace ConditionalLoader\Service\Factory;
 
 use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\Mvc\Service\ModuleManagerFactory;
+use Zend\Mvc\Service\ModuleManagerFactory as ZendModuleManagerFactory;
+use ConditionalLoader\Resolver\ConditionResolverInterface;
 
-class ModuleManagerFactory extends ModuleManagerFactory
+class ModuleManagerFactory extends ZendModuleManagerFactory
 {
     /**
      * {@inheritDoc}
@@ -15,12 +16,33 @@ class ModuleManagerFactory extends ModuleManagerFactory
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $configuration    = $serviceLocator->get('ApplicationConfig');
-        $conditionalResolvers  = $configuration['modules_conditional_resolvers'];
+
+        if (isset($configuration['modules_condition_resolvers'])) {
+            $conditionResolvers  = $configuration['modules_condition_resolvers'];
+        }
 
         $moduleManager = parent::createService($serviceLocator);
 
-        $moduleManager->getModules();
+        $modules = $moduleManager->getModules();
+
+        foreach($conditionResolvers as $module => $conditionResolver) {
+            if (!in_array($module, $modules)) {
+                continue;
+            }
+
+            $resolver = $serviceLocator->get($conditionResolver);
+            if (!$resolver instanceof ConditionResolverInterface) {
+                continue;
+            }
+            
+            if (!$resolver->resolve()) {
+                unset($modules[array_search($module, $modules)]);
+            }
+        }
+
+        $moduleManager->setModules($modules);
 
         return $moduleManager;
     }
+
 }
