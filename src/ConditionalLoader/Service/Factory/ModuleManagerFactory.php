@@ -17,6 +17,8 @@ class ModuleManagerFactory extends ZendModuleManagerFactory
     {
         $configuration    = $serviceLocator->get('ApplicationConfig');
 
+        $conditionResolvers = array();
+
         if (isset($configuration['modules_condition_resolvers'])) {
             $conditionResolvers  = $configuration['modules_condition_resolvers'];
         }
